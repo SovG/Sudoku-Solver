@@ -8,6 +8,8 @@
 #import "memAlloc.h"
 #import "msvv.h"
 
+/*TODO: All I can think of with using a semaphore is the Counter, as nothing else
+ * is working in the critical section */
 int main (int argc, char* argv[])
 {
     if (argc != 4)
@@ -18,7 +20,10 @@ int main (int argc, char* argv[])
     Buffer1 *buffer1;
     Buffer2 *buffer2;
     int* counter;
+    int parentPID = getpid();   /* So we know which process is parent one */
     int status; /* For error checking */
+    int childProcCount = 1; /* Counts how many child processes created, so each child
+    knows which row it is working on */
     /* File Descriptors */
     int buffer1FD, buffer2FD, counterFD;
 
@@ -51,6 +56,48 @@ int main (int argc, char* argv[])
                                     counterFD, 0);
 
     status = readFile(buffer1, buffer2, filename);
+    if (status == -1)
+    {
+        fprintf(stderr, "Error with reading file");
+        return -1;
+    }
+
+    /* Create 9 Children Processes that check validty of each row of solution */
+    for (i = 0; i < 11; i++)
+    {
+        /* Only make a child if process is parent */
+        if (parentPID == getpid())
+        {
+            pid = fork();
+            childProcCount++;
+        }
+    }
+
+    if (parentPID != getpid())
+    {
+        /* If Child Process is one of the first 9 created then use it to validate
+         * an individual row of the solution, where childProcCount tells function
+         * what row to validate */
+        if(childProcCount < 9)
+        {
+            validateRow(childProcCount);
+        }
+        else if (childProcCount == 9)
+        {
+            vaildateAllCols();
+        }
+        else
+        {
+
+        }
+        exit(0); /* Child Process exits after completing calculations */
+    }
+    else
+    {
+        wait();
+    }
+
+
 
 
 

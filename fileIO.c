@@ -18,11 +18,16 @@ int readFile (Buffer1* buffer1, char* filename)
     {
         if (c < 1 || c > 9)
         {
-            fprintf(stderr, "Error - Sudoku Solution input is invalid\n", );
+            fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
             return -1;
         }
         buffer1->sudokuSolution[0][count] = c;
         count++;
+        if (count > 81)
+        {
+            fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
+            return -1;
+        }
     }
     return 0;
 }
