@@ -4,7 +4,7 @@
 #DEF MEMALLOC_H
 typedef struct Buffer1
 {
-    int** sudokuSolution;
+    int sudokuSolution;
 } Buffer1;
 
 typedef struct Buffer2
