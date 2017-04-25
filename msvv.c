@@ -80,7 +80,8 @@ int main (int argc, char* argv[])
          * what row to validate */
         if(childProcCount < 9)
         {
-            validateRow(childProcCount);
+            validateRow(childProcCount, buffer1, buffer2);
+            /* Increment Counter somewhere here if valid True */
         }
         else if (childProcCount == 9)
         {
@@ -94,6 +95,7 @@ int main (int argc, char* argv[])
     }
     else
     {
+        /* Make Parent Process wait for all children to complete */
         wait();
     }
 
