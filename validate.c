@@ -101,3 +101,18 @@ int validateCols (int colNum, Buffer1 buffer1)
     return valid;
 
 }
+
+/*TODO: Figure out how to divide the Sudoku Solution into the 9 seperate subgrids*/
+int validateAllGrids (Buffer1 buffer1, Buffer2 buffer2)
+{
+    int[3][3] subGrid;
+    int i;
+
+    for (i = 0; i < 9; i++)
+    {
+        /*TODO: SHIT HERE */
+        subGrid[0][0] = buffer1->sudokuSolution[0][0];
+
+        validateSubGrid(subGrid);
+    }
+}

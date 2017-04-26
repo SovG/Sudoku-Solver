@@ -31,3 +31,32 @@ int readFile (Buffer1* buffer1, char* filename)
     }
     return 0;
 }
+
+/* Function prints out the results for the program */
+void printResults (Buffer2* buffer2, int totalVal)
+{
+    int i;
+
+    for (i = 0; i < 9; i++)
+    {
+        if(buffer2->validation[i] == 1)
+        {
+            printf("Validation result from Process ID-%d: row %d is valid.\n", i, i);
+        }
+        else
+        {
+            printf("Validation result from Process ID-%d: row %d is not valid.\n", i, i);
+        }
+    }
+    printf("Validation result from Process ID-10: %d of 9 columns are valid.\n", buffer2->validation[9]);
+    printf("Validation result from Process ID-11: %d of 9 Sub-Grids are valid.\n\n", buffer2->validation[10]);
+
+    if(totalVal != 27)
+    {
+        printf("There are %d valid sub-grids, and thus solution is invalid.\n", buffer2->validation[11]);
+    }
+    else
+    {
+        printf("There are 27 valid sub-grids, and thus solution is valid.\n");
+    }
+}

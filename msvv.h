@@ -2,6 +2,8 @@
 /* Header gaurds as typedefing */
 #ifndef MSVV_H
 #define MSVV_H
+#import <semaphore.h>
+
 
 typedef struct Buffer1
 {
@@ -13,6 +15,10 @@ typedef struct Buffer2
     int validated[11];
 } Buffer2;
 
+typedef struct Locks
+{
+    sem_t mutex;
+} Locks;
 
 
 #endif

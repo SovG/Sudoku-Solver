@@ -2,34 +2,38 @@
  * as created for the OS (COMP2006) 2017 assignment
  *
  * Created by Nehal Ghuman
-* 20th April 2017                                                             */
+ * 20th April 2017                                                             */
 
 #import <stdio.h>
 #import "memAlloc.h"
 #import "msvv.h"
+#import <sys/wait.h>
+#import <sys/types.h>
+#import <semaphore.h>
 
-/*TODO: All I can think of with using a semaphore is the Counter, as nothing else
- * is working in the critical section */
 int main (int argc, char* argv[])
 {
     if (argc != 4)
     {
         printf ("Please use program in following format\n");
-        printf ("msvv INFILE OUTFILE")
+        printf ("msvv INFILE MAXDELAY")
     }
     Buffer1 *buffer1;
     Buffer2 *buffer2;
+    Locks *locks;
     int* counter;
+
     int parentPID = getpid();   /* So we know which process is parent one */
     int status; /* For error checking */
-    int childProcCount = 1; /* Counts how many child processes created, so each child
+    int childProcCount = 0; /* Counts how many child processes created, so each child
     knows which row it is working on */
     /* File Descriptors */
-    int buffer1FD, buffer2FD, counterFD;
+    int buffer1FD, buffer2FD, counterFD, locksFD;
 
     buffer1FD = shm_open("Buffer 1", O_CREAT | O_RDRW, 0666);
     buffer2FD = shm_open("Buffer 2", O_CREAT | O_RDRW, 0666);
     counterFD = shm_open("Counter", O_CREAT | O_RDRW, 0666);
+    locksFD = shm_open("Locks", O_CREAT | O_RDRW, 0666);
 
     /* Error detection if memory blocks not created properly */
     if ((buffer1FD == -1) || (buffer2FD == -1) || (counterFD == -1))
@@ -41,6 +45,7 @@ int main (int argc, char* argv[])
     status = ftruncate(buffer1FD, sizeof(Buffer1));
     status += ftruncate(buffer2FD, sizeof(Buffer2));
     status += ftruncate(counterFD, sizeof(int));
+    status += ftruncate(statusFD, sizeof(Locks));
     if (status != 0)
     {
         fprintf(stderr, "Error setting shared memory size\n");
@@ -54,6 +59,10 @@ int main (int argc, char* argv[])
                                     buffer2FD, 0);
     counter = (int*)mmap(0, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED,
                                     counterFD, 0);
+    locks = (Locks*)mmap(0, sizeof(Locks), PROT_READ | PROT_WRITE, MAP_SHARED,
+                                    locksFD, 0);
+
+    sem_init(locks->mutex, 0, 1);
 
     status = readFile(buffer1, buffer2, filename);
     if (status == -1)
@@ -81,27 +90,38 @@ int main (int argc, char* argv[])
         if(childProcCount < 9)
         {
             validateRow(childProcCount, buffer1, buffer2);
+            sem_wait(locks->mutex);
+            counter = counter + buffer2->validated[childProcCount];
+            sem_post(locks->mutex);
             /* Increment Counter somewhere here if valid True */
         }
         else if (childProcCount == 9)
         {
-            vaildateAllCols();
+            vaildateAllCols(buffer1, buffer2);
+            sem_wait(locks->mutex);
+            counter = counter + buffer2->validated[9];
+            sem_post(locks->mutex);
         }
         else
         {
-
+            validateAllGrids(buffer1, buffer2);
+            sem_wait(locks->mutex);
+            counter = counter + buffer2->validated[10];
+            sem_post(locks->mutex);
         }
         exit(0); /* Child Process exits after completing calculations */
     }
     else
     {
         /* Make Parent Process wait for all children to complete */
-        wait();
+        while(waitpid(-1, NULL, 0))
+        {
+            if (errno == ECHILD)
+                break;
+        }
     }
-
-
-
-
+    /* Print Stuff now that all validation is done */
+    printResults(buffer2, counter);
 
     return 0;
 }
