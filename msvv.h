@@ -13,11 +13,14 @@ typedef struct Buffer1
 typedef struct Buffer2
 {
     int validated[11];
+    int completedChildren;
 } Buffer2;
 
 typedef struct Locks
 {
     sem_t mutex;
+    sem_t full;
+    sem_t empty;
 } Locks;
 
 

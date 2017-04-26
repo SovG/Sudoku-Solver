@@ -7,8 +7,6 @@
 #import <stdio.h>
 #import "memAlloc.h"
 #import "msvv.h"
-#import <sys/wait.h>
-#import <sys/types.h>
 #import <semaphore.h>
 
 int main (int argc, char* argv[])
@@ -63,6 +61,9 @@ int main (int argc, char* argv[])
                                     locksFD, 0);
 
     sem_init(locks->mutex, 0, 1);
+    sem_init(locks->full, 0, 1);
+    sem_init(locks->empty, 0, 0);
+    buffer2->completedChildren = 0;
 
     status = readFile(buffer1, buffer2, filename);
     if (status == -1)
@@ -71,7 +72,7 @@ int main (int argc, char* argv[])
         return -1;
     }
 
-    /* Create 9 Children Processes that check validty of each row of solution */
+    /* Create 11 Children Processes that check validty of each row of solution */
     for (i = 0; i < 11; i++)
     {
         /* Only make a child if process is parent */
@@ -92,14 +93,26 @@ int main (int argc, char* argv[])
             validateRow(childProcCount, buffer1, buffer2);
             sem_wait(locks->mutex);
             counter = counter + buffer2->validated[childProcCount];
+            /* Variable completedChildren holds the number of processes completed
+             * so when it reaches 11, the semaphore empty which is blocking the
+             * parent, will be incremented so it can continue execution */
+            buffer2->completedChildren++;
+            if (buffer2->completedChildren == 11)
+            {
+                sem_post(locks->empty);
+            }
             sem_post(locks->mutex);
-            /* Increment Counter somewhere here if valid True */
         }
         else if (childProcCount == 9)
         {
             vaildateAllCols(buffer1, buffer2);
             sem_wait(locks->mutex);
             counter = counter + buffer2->validated[9];
+            buffer2->completedChildren++;
+            if (buffer2->completedChildren == 11)
+            {
+                sem_post(locks->empty);
+            }
             sem_post(locks->mutex);
         }
         else
@@ -107,25 +120,24 @@ int main (int argc, char* argv[])
             validateAllGrids(buffer1, buffer2);
             sem_wait(locks->mutex);
             counter = counter + buffer2->validated[10];
+            buffer2->completedChildren++;
+            if (buffer2->completedChildren == 11)
+            {
+                sem_post(locks->empty);
+            }
             sem_post(locks->mutex);
         }
         exit(0); /* Child Process exits after completing calculations */
     }
     else
     {
-        /* Make Parent Process wait for all children to complete */
-        while(waitpid(-1, NULL, 0))
-        {
-            if (errno == ECHILD)
-                break;
-        }
+        /* Semaphore Empty is only incremented so that it passes this block when
+         * the last child process completes. Makes sure that the parent is blocked
+         * until all validation is complete                                     */
+        sem_wait(locks->empty);
     }
     /* Print Stuff now that all validation is done */
     printResults(buffer2, counter);
 
     return 0;
 }
-
-/* Buffered1 is shared memory, should be read only, contains the sudoku Solution
- * Buffered2 is shared memory, contains the results of each sub-grid
-*/
