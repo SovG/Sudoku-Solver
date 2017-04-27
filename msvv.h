@@ -2,21 +2,21 @@
 /* Header gaurds as typedefing */
 #ifndef MSVV_H
 #define MSVV_H
-#import <semaphore.h>
+#include <semaphore.h>
 
 
-typedef struct Buffer1
+typedef struct
 {
     int sudokuSolution[9][9];
 } Buffer1;
 
-typedef struct Buffer2
+typedef struct
 {
     int validated[11];
     int completedChildren;
 } Buffer2;
 
-typedef struct Locks
+typedef struct
 {
     sem_t mutex;
     sem_t full;

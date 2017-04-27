@@ -1,6 +1,6 @@
 /* File contains functions pertaining to File IO for msvv.c */
-#import "msvv.h"
-#import <stdio.h>
+#include "msvv.h"
+#include <stdio.h>
 
 /* Function reads the Sudoku Solution from file and loads it into Buffer 1 */
 int readFile (Buffer1* buffer1, char* filename)
@@ -16,6 +16,8 @@ int readFile (Buffer1* buffer1, char* filename)
     }
     while((c = fgetc(inFile)) != EOF)
     {
+        c -= 48;
+        printf("Input: %d\n", c);
         if (c < 1 || c > 9)
         {
             fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
@@ -25,8 +27,9 @@ int readFile (Buffer1* buffer1, char* filename)
         count++;
         if (count > 81)
         {
-            fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
-            return -1;
+/*            fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
+            return -1; */
+            break;
         }
     }
     return 0;
@@ -39,7 +42,7 @@ void printResults (Buffer2* buffer2, int totalVal)
 
     for (i = 0; i < 9; i++)
     {
-        if(buffer2->validation[i] == 1)
+        if(buffer2->validated[i] == 1)
         {
             printf("Validation result from Process ID-%d: row %d is valid.\n", i, i);
         }
@@ -48,12 +51,12 @@ void printResults (Buffer2* buffer2, int totalVal)
             printf("Validation result from Process ID-%d: row %d is not valid.\n", i, i);
         }
     }
-    printf("Validation result from Process ID-10: %d of 9 columns are valid.\n", buffer2->validation[9]);
-    printf("Validation result from Process ID-11: %d of 9 Sub-Grids are valid.\n\n", buffer2->validation[10]);
+    printf("Validation result from Process ID-10: %d of 9 columns are valid.\n", buffer2->validated[9]);
+    printf("Validation result from Process ID-11: %d of 9 Sub-Grids are valid.\n\n", buffer2->validated[10]);
 
     if(totalVal != 27)
     {
-        printf("There are %d valid sub-grids, and thus solution is invalid.\n", buffer2->validation[11]);
+        printf("There are %d valid sub-grids, and thus solution is invalid.\n", buffer2->validated[11]);
     }
     else
     {

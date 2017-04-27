@@ -1,6 +1,8 @@
 /* File contains functions pertaining to the validation of each sub-grid */
+#include "msvv.h"
+#include "validate.h"
 
-int validateRow (int rowNum, Buffer1 buffer1, Buffer2 buffer2)
+int validateRow (int rowNum, Buffer1 *buffer1, Buffer2 *buffer2)
 {
     int valid = 1;  /* 1 signifies true, 0 false */
     int i, boxVal;
@@ -8,28 +10,36 @@ int validateRow (int rowNum, Buffer1 buffer1, Buffer2 buffer2)
 
     for (i = 0; i < 9; i++)
     {
-        boxVal = buffer1->sudokuSolution[rowNum][i]
-        case boxVal
+        boxVal = buffer1->sudokuSolution[rowNum][i];
+        switch (boxVal) {
             case 1:
                 validRow[0] = 1;
+                break;
             case 2:
                 validRow[1] = 2;
+                break;
             case 3:
                 validRow[2] = 3;
+                break;
             case 4:
                 validRow[3] = 4;
+                break;
             case 5:
                 validRow[4] = 5;
+                break;
             case 6:
                 validRow[5] = 6;
+                break;
             case 7:
                 validRow[6] = 7;
+                break;
             case 8:
                 validRow[7] = 8;
+                break;
             case 9:
                 validRow[8] = 9;
-            default:
-                return -1;
+                break;
+            }
     }
 
     for (i = 0; i < 9; i++)
@@ -43,7 +53,7 @@ int validateRow (int rowNum, Buffer1 buffer1, Buffer2 buffer2)
     return valid;
 }
 
-int validateAllCols (Buffer1 buffer1, Buffer2 buffer2)
+int validateAllCols (Buffer1 *buffer1, Buffer2 *buffer2)
 {
     int i, totalVal;
     for (i = 0; i < 9; i++)
@@ -58,15 +68,16 @@ int validateAllCols (Buffer1 buffer1, Buffer2 buffer2)
     return totalVal;
 }
 
-int validateCols (int colNum, Buffer1 buffer1)
+int validateCols (int colNum, Buffer1 *buffer1)
 {
+    int valid = 1; /* 1 Signifies True, 0 for false */
     int validRow[9];
     int i, boxVal;
 
     for (i = 0; i < 9; i++)
     {
         boxVal = buffer1->sudokuSolution[i][colNum];
-        case boxVal
+        switch (boxVal) {
             case 1:
                 validRow[0] = 1;
             case 2:
@@ -85,9 +96,7 @@ int validateCols (int colNum, Buffer1 buffer1)
                 validRow[7] = 8;
             case 9:
                 validRow[8] = 9;
-            default:
-            /* Error, solution can't have a number thats not 1-9 */
-                return -1;
+            }
     }
 
     for (i = 0; i < 9; i++)
@@ -103,16 +112,8 @@ int validateCols (int colNum, Buffer1 buffer1)
 }
 
 /*TODO: Figure out how to divide the Sudoku Solution into the 9 seperate subgrids*/
-int validateAllGrids (Buffer1 buffer1, Buffer2 buffer2)
+int validateAllGrids (Buffer1 *buffer1, Buffer2 *buffer2)
 {
-    int[3][3] subGrid;
-    int i;
-
-    for (i = 0; i < 9; i++)
-    {
-        /*TODO: SHIT HERE */
-        subGrid[0][0] = buffer1->sudokuSolution[0][0];
-
-        validateSubGrid(subGrid);
-    }
+    buffer2->validated[10] = 9;
+    return 9;
 }
