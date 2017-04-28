@@ -19,7 +19,6 @@ typedef struct
 typedef struct
 {
     sem_t mutex;
-    sem_t full;
     sem_t empty;
 } Locks;
 

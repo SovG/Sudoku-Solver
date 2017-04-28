@@ -16,20 +16,26 @@ int readFile (Buffer1* buffer1, char* filename)
     }
     while((c = fgetc(inFile)) != EOF)
     {
-        c -= 48;
-        printf("Input: %d\n", c);
-        if (c < 1 || c > 9)
+        if (((char)c == '\n') || ((char)c == ' '))
         {
-            fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
-            return -1;
+            /* Do Nothing/Ignore */
         }
-        buffer1->sudokuSolution[0][count] = c;
-        count++;
-        if (count > 81)
+        else
         {
+            c -= 48;
+            if (c < 1 || c > 9)
+            {
+                fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
+                return -1;
+            }
+            buffer1->sudokuSolution[0][count] = c;
+            count++;
+            if (count > 81)
+            {
 /*            fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
             return -1; */
             break;
+            }
         }
     }
     return 0;
