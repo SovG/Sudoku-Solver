@@ -70,8 +70,12 @@ int main (int argc, char* argv[])
                                         locksFD, 0);
 
         sem_init(&locks->mutex, 0, 1);
-        sem_init(&locks->empty, 0, 1);
+        sem_init(&locks->empty, 1, 0);
         buffer2->completedChildren = 0;
+        for (i = 0; i < 11; i++)
+        {
+            buffer2->validated[i] = 0;
+        }
 
         status = readFile(buffer1, argv[1]);
         if (status == -1)
@@ -79,6 +83,7 @@ int main (int argc, char* argv[])
             fprintf(stderr, "Error with reading file");
             return -1;
         }
+        *counter = 0;
         /* Create 11 Children Processes that check validty of each row of solution */
         for (i = 0; i < 11; i++)
         {
@@ -93,78 +98,64 @@ int main (int argc, char* argv[])
 
         if (parentPID != getpid())
         {
+            int valid;
             /* If Child Process is one of the first 9 created then use it to validate
              * an individual row of the solution, where childProcCount tells function
              * what row to validate */
             if(childProcCount < 10)
             {
-                validateRow(childProcCount, buffer1, buffer2);
+                valid = validateRow(childProcCount, buffer1);
                 sem_wait(&locks->mutex);
-                counter = counter + buffer2->validated[childProcCount];
+                *counter += valid;
                 /* Variable completedChildren holds the number of processes completed
                  * so when it reaches 11, the semaphore empty which is blocking the
                  * parent, will be incremented so it can continue execution */
+                buffer2->validated[childProcCount-1] = valid;
                 buffer2->completedChildren++;
                 if (buffer2->completedChildren == 11)
                 {
                     sem_post(&locks->empty);
-                    printf("SemIncremented\n");
-                    sem_getvalue(&locks->empty, &i);
-                    printf("SemValue: %d", i);
-
                 }
                 sem_post(&locks->mutex);
-                printf("Child Proc#: %d, completedChildren: %d\n", childProcCount, buffer2->completedChildren);
                 sleep(atoi(argv[2]));
             }
             else if (childProcCount == 10)
             {
-                validateAllCols(buffer1, buffer2);
+                valid = validateAllCols(buffer1);
                 sem_wait(&locks->mutex);
-                counter = counter + buffer2->validated[9];
+                *counter += valid;
                 buffer2->completedChildren++;
+                buffer2->validated[childProcCount-1] = valid;
                 if (buffer2->completedChildren == 11)
                 {
                     sem_post(&locks->empty);
-                    printf("SemIncremented\n");
-                    sem_getvalue(&locks->empty, &i);
-                    printf("SemValue: %d", i);
-
                 }
                 sem_post(&locks->mutex);
-                printf("Child Proc#: %d, completedChildren: %d\n", childProcCount, buffer2->completedChildren);
                 sleep(atoi(argv[2]));
             }
             else
             {
-                validateAllGrids(buffer1, buffer2);
+                valid = validateAllGrids(buffer1);
                 sem_wait(&locks->mutex);
-                counter = counter + buffer2->validated[10];
+                *counter += valid;
+                buffer2->validated[childProcCount-1] = valid;
                 buffer2->completedChildren++;
                 if (buffer2->completedChildren == 11)
                 {
                     sem_post(&locks->empty);
-                    printf("SemIncremented\n");
-                    sem_getvalue(&locks->empty, &i);
-                    printf("SemValue: %d", i);
                 }
                 sem_post(&locks->mutex);
-                printf("Child Proc#: %d, completedChildren: %d\n", childProcCount, buffer2->completedChildren);
                 sleep(atoi(argv[2]));
             }
             exit(0); /* Child Process exits after completing calculations */
         }
         else
         {
-            printf("Parent Blocked\n");
             /* Semaphore Empty is only incremented so that it passes this block when
              * the last child process completes. Makes sure that the parent is blocked
              * until all validation is complete                                     */
             sem_wait(&locks->empty);
-            sem_wait(&locks->empty);
-            printf("Parent Unblocked\n");
         }
-        printf("Test2\n");
         /* Print Stuff now that all validation is done */
         printResults(buffer2, *counter);
         fflush(stdout);
@@ -178,6 +169,5 @@ int main (int argc, char* argv[])
         close(counterFD);
         close(locksFD);
     }
-
     return 0;
 }

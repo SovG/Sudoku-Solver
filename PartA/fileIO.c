@@ -46,9 +46,9 @@ void printResults (Buffer2* buffer2, int totalVal)
 {
     int i;
 
-    for (i = 0; i < 9; i++)
+    for (i = 1; i < 10; i++)
     {
-        if(buffer2->validated[i] == 1)
+        if(buffer2->validated[i-1] == 1)
         {
             printf("Validation result from Process ID-%d: row %d is valid.\n", i, i);
         }
@@ -62,7 +62,7 @@ void printResults (Buffer2* buffer2, int totalVal)
 
     if(totalVal != 27)
     {
-        printf("There are %d valid sub-grids, and thus solution is invalid.\n", buffer2->validated[11]);
+        printf("There are %d valid sub-grids, and thus solution is invalid.\n", totalVal);
     }
     else
     {
