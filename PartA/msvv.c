@@ -157,7 +157,7 @@ int main (int argc, char* argv[])
             sem_wait(&locks->empty);
         }
         /* Print Stuff now that all validation is done */
-        printResults(buffer2, *counter);
+        printResults(buffer2, *counter); 
         fflush(stdout);
 
         /* Destroy shared memory and semaphores */
