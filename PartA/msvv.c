@@ -88,7 +88,7 @@ int main (int argc, char* argv[])
         for (i = 0; i < 11; i++)
         {
             /* Only make a child if process is parent */
-            if (parentPID ==getpid())
+            if (parentPID == getpid())
             {
                 childProcCount++;
                 fork();
@@ -157,7 +157,7 @@ int main (int argc, char* argv[])
             sem_wait(&locks->empty);
         }
         /* Print Stuff now that all validation is done */
-        printResults(buffer2, *counter); 
+        printResults(buffer2, *counter);
         fflush(stdout);
 
         /* Destroy shared memory and semaphores */
