@@ -4,9 +4,10 @@
 #define MSVV_H
 
 typedef struct {
-    int[9][9] buffer1;
-    int[11] buffer2;
+    int buffer1[9][9];
+    int buffer2[11];
     int totalVal;
+    int completedChildren;
 } SharedMemory;
 
 #endif
