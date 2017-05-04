@@ -99,6 +99,9 @@ int main (int argc, char* argv[])
         if (parentPID != getpid())
         {
             int valid;
+            /* Each Child Process is seeded by its Process ID that is unique to
+             * itself, ensuring that the random sleep is random between childs */
+            srand(getpid()+childProcCount);
             /* If Child Process is one of the first 9 created then use it to validate
              * an individual row of the solution, where childProcCount tells function
              * what row to validate */
@@ -117,7 +120,7 @@ int main (int argc, char* argv[])
                     sem_post(&locks->empty);
                 }
                 sem_post(&locks->mutex);
-                sleep(atoi(argv[2]));
+                sleep(rand() % atoi(argv[2]));
             }
             else if (childProcCount == 10)
             {
@@ -131,7 +134,7 @@ int main (int argc, char* argv[])
                     sem_post(&locks->empty);
                 }
                 sem_post(&locks->mutex);
-                sleep(atoi(argv[2]));
+                sleep(rand() % atoi(argv[2]));
             }
             else
             {
@@ -145,7 +148,7 @@ int main (int argc, char* argv[])
                     sem_post(&locks->empty);
                 }
                 sem_post(&locks->mutex);
-                sleep(atoi(argv[2]));
+                sleep(rand() % atoi(argv[2]));
             }
             exit(0); /* Child Process exits after completing calculations */
         }

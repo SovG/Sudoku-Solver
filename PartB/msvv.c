@@ -5,26 +5,45 @@
  * Created by Nehal Ghuman
  * 2nd May, 2017                                                              */
 
- int main (int argc, char* argv[])
- {
-     if (argc != 3)
-     {
-         printf ("Please use program in following format\n");
-         printf ("msvv INFILE MAXDELAY");
-     }
-     else
-     {
-         int buffer1[9][9];
-         int buffer2[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-         int threadsComplete = 0;
-         int i;
+#include "msvv.h";
+#include "fileIO.h";
+#include <pthread.h>;
+/* Global Variable shared between threads as used by textbook */
+SharedMemory shareMem;
 
-         for (i = 0; i < 10; i++)
-         {
-             if (i < 8)
-             {
-                 
-             }
-         }
-     }
- }
+int main (int argc, char* argv[])
+{
+    if (argc != 3)
+    {
+        printf ("Please use program in following format\n");
+        printf ("msvv INFILE MAXDELAY");
+    }
+    else
+    {
+        pthread_t* threadArray;
+        shareMem = (SharedMemory*)malloc(sizeof(SharedMemory));
+        readFile(shareMem, argv[1]);
+
+        int i;
+        for (i = 0; i < 10; i++)
+        {
+            if (i < 8)
+            {
+                pthread_create(threadArray[i], NULL, groupOne, NULL);
+            }
+            else if (i == 8)
+            {
+                pthread_create(threadArray[i], NULL, groupTwo, NULL);
+            }
+            else
+            {
+                pthread_create(threadArray[i], NULL, groupThree, NULL);
+            }
+        }
+    }
+}
+
+int groupOne (void* threadNum)
+{
+
+}
