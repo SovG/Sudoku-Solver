@@ -10,6 +10,7 @@
 #include <pthread.h>;
 /* Global Variable shared between threads as used by textbook */
 SharedMemory* shareMem;
+Locks* locks;
 
 int main (int argc, char* argv[])
 {
@@ -20,19 +21,18 @@ int main (int argc, char* argv[])
     }
     else
     {
-        pthread_t* threadArray;
+        pthread_t threadArray[11];
         shareMem = (SharedMemory*)malloc(sizeof(SharedMemory));
         readFile(shareMem, argv[1]);
 
         int i;
-        for (i = 0; i < 10; i++)
+        for (i = 0; i < 11; i++)
         {
-            if (i < 8)
+            if (i < 9)
             {
                 pthread_create(threadArray[i], NULL, groupOne, (void*)i);
-                /*Increment completedChildren */
             }
-            else if (i == 8)
+            else if (i == 9)
             {
                 pthread_create(threadArray[i], NULL, groupTwo, NULL);
             }
@@ -41,39 +41,72 @@ int main (int argc, char* argv[])
                 pthread_create(threadArray[i], NULL, groupThree, NULL);
             }
         }
-        /*TODO: Put pthread_cond_wait here to block parent until all children have completed */
+        /* Waits Parent Thread using pthread_cond_wait() until its signaled
+         * by one of its Child threads                                      */
+        /*TODO: Check if can just have pthread_cond_wait() by itself outside of while loop */
+        while ( shareMem->completedChildren < 10)
+        {
+            pthread_cond_wait();
+        }
         printResults(shareMem);
+
+        /*TODO: Check how to properly do pthread_join */
+        for (i = 0; i < 11; i++)
+        {
+            pthread_join(threadArray[i], NULL);
+        }
+
+        free(shareMem);
     }
 }
 
 int groupOne (void* threadNum)
 {
     int row, valid;
-
-    row =
-
+    row = (int)threadNum;
     valid = validateRow(row, shareMem->buffer1);
-    /*TODO: Mutex here for when your manipulating the total val/buffer2 */
+
+    /* As accessing shared data using Mutex Locks to solve CSP      */
+    pthread_mutex_lock(&locks.mutex);
     shareMem->buffer2[row] = valid;
     shareMem->totalVal += valid;
+    shareMem->completedChildren++;
+    /* If all children have been completed signal parent thread to continue */
+    if (shareMem->completedChildren == 10)
+    {
+        pthread_cond_signal(&locks.empty);
+    }
+    pthread_mutex_unlock(&locks.mutex);
 }
 
 int groupTwo ()
 {
     int valid;
-
     valid = validateAllCols(shareMem->buffer1);
-    /*TODO: Mutext here for when manipulating totalVal/Buffer2 */
+
+    pthread_mutex_lock(&locks->mutex)
     shareMem->buffer2[9] = valid;
     shareMem->totalVal += valid;
+    shareMem->completedChildren++;
+    if (shareMem->completedChildren == 11)
+    {
+        pthread_cond_signal(&locks.empty);
+    }
+    pthread_mutex_unlock(&locks.mutex);
 }
 
 int groupThree ()
 {
     int valid;
-
     valid = validateAllGrids(shareMem->buffer1);
 
+    pthread_mutex_lock(&locks->mutex)
     shareMem->buffer2[10] = valid;
     shareMem->totalVal += valid;
+    shareMem->completedChildren++;
+    if (shareMem->completedChildren == 11)
+    {
+        pthread_cond_signal(&locks.empty);
+    }
+    pthread_mutex_unlock(&locks.mutex);
 }

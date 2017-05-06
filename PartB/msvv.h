@@ -10,4 +10,9 @@ typedef struct {
     int completedChildren;
 } SharedMemory;
 
+typedef struct {
+    pthread_mutex_t mutex;
+    pthread_cond_t empty;
+} Locks;
+
 #endif

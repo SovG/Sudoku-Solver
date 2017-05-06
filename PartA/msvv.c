@@ -158,6 +158,10 @@ int main (int argc, char* argv[])
              * the last child process completes. Makes sure that the parent is blocked
              * until all validation is complete                                     */
             sem_wait(&locks->empty);
+            /* wait(NULL) kills all the zombie processes as by this stage all
+             * tasks to be done by the children have been completed and the
+             * parent has been unblocked by the semaphore                     */
+            wait(NULL);
         }
         /* Print Stuff now that all validation is done */
         printResults(buffer2, *counter);
@@ -170,7 +174,7 @@ int main (int argc, char* argv[])
         close(buffer1FD);
         close(buffer2FD);
         close(counterFD);
-        close(locksFD);
+        close(locksFD); 
     }
     return 0;
 }
