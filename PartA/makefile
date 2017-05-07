@@ -15,4 +15,4 @@ validate.o : validate.c msvv.h
 	$(CC) validate.c -c $(CFLAGS)
 
 clean :
-		rm -f $(OBJ) $(EXEC)
+		rm -f $(OBJ) $(EXEC) logfile.txt
