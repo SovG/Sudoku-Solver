@@ -2,6 +2,7 @@
 
 #ifndef MSVV_H
 #define MSVV_H
+#include <pthread.h>
 
 typedef struct {
     int buffer1[9][9];
@@ -12,7 +13,11 @@ typedef struct {
 
 typedef struct {
     pthread_mutex_t mutex;
-    pthread_cond_t empty;
+    pthread_cond_t complete;
 } Locks;
+
+void* groupOne (void*);
+void* groupTwo (void*);
+void* groupThree (void*);
 
 #endif

@@ -38,6 +38,7 @@ int readFile (SharedMemory* shareMem, char* filename)
             }
         }
     }
+    fclose(inFile);
     return 0;
 }
 
@@ -48,7 +49,7 @@ void printResults (SharedMemory* shareMem)
 
     for (i = 1; i < 10; i++)
     {
-        if(shareMem->validated[i-1] == 1)
+        if(shareMem->buffer2[i-1] == 1)
         {
             printf("Validation result from Process ID-%d: row %d is valid.\n", i, i);
         }
@@ -57,12 +58,12 @@ void printResults (SharedMemory* shareMem)
             printf("Validation result from Process ID-%d: row %d is not valid.\n", i, i);
         }
     }
-    printf("Validation result from Process ID-10: %d of 9 columns are valid.\n", shareMem->validated[9]);
-    printf("Validation result from Process ID-11: %d of 9 Sub-Grids are valid.\n\n", shareMem->validated[10]);
+    printf("Validation result from Process ID-10: %d of 9 columns are valid.\n", shareMem->buffer2[9]);
+    printf("Validation result from Process ID-11: %d of 9 Sub-Grids are valid.\n\n", shareMem->buffer2[10]);
 
     if(shareMem->totalVal != 27)
     {
-        printf("There are %d valid sub-grids, and thus solution is invalid.\n", totalVal);
+        printf("There are %d valid sub-grids, and thus solution is invalid.\n", shareMem->totalVal);
     }
     else
     {

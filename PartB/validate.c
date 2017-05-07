@@ -3,7 +3,7 @@
 #include "validate.h"
 #include <stdio.h>
 
-int validateRow (int rowNum, int** buffer1)
+int validateRow (int rowNum, SharedMemory* shareMem)
 {
     int valid = 1;  /* 1 signifies true, 0 false */
     int i, boxVal;
@@ -11,7 +11,7 @@ int validateRow (int rowNum, int** buffer1)
 
     for (i = 0; i < 9; i++)
     {
-        boxVal = buffer1[rowNum-1][i];
+        boxVal = shareMem->buffer1[rowNum-1][i];
         validRow[boxVal-1]++;
     }
 
@@ -25,12 +25,12 @@ int validateRow (int rowNum, int** buffer1)
     return valid;
 }
 
-int validateAllCols (int** buffer1)
+int validateAllCols (SharedMemory* shareMem)
 {
     int i, totalVal = 0;
     for (i = 0; i < 9; i++)
     {
-        if ((validateCols(i, buffer1)) == 1)
+        if ((validateCols(i, shareMem)) == 1)
         {
             totalVal++;
         }
@@ -39,7 +39,7 @@ int validateAllCols (int** buffer1)
     return totalVal;
 }
 
-int validateCols (int colNum, int** buffer1)
+int validateCols (int colNum, SharedMemory* shareMem)
 {
     int valid = 1; /* 1 Signifies True, 0 for false */
     int validCol[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -47,7 +47,7 @@ int validateCols (int colNum, int** buffer1)
 
     for (i = 0; i < 9; i++)
     {
-        boxVal = buffer1[i][colNum];
+        boxVal = shareMem->buffer1[i][colNum];
         validCol[boxVal-1]++;
     }
 
@@ -62,52 +62,52 @@ int validateCols (int colNum, int** buffer1)
     return valid;
 }
 
-int validateAllGrids (int** buffer1)
+int validateAllGrids (SharedMemory* shareMem)
 {
     int totalVal = 0;
     int i, subGrid[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     for (i = 0; i < 3; i++)
     {
-        subGrid[0] = buffer1[0][0+i*3];
-        subGrid[1] = buffer1[0][1+i*3];
-        subGrid[2] = buffer1[0][2+i*3];
-        subGrid[3] = buffer1[0][9+i*3];
-        subGrid[4] = buffer1[0][10+i*3];
-        subGrid[5] = buffer1[0][11+i*3];
-        subGrid[6] = buffer1[0][18+i*3];
-        subGrid[7] = buffer1[0][19+i*3];
-        subGrid[8] = buffer1[0][20+i*3];
+        subGrid[0] = shareMem->buffer1[0][0+i*3];
+        subGrid[1] = shareMem->buffer1[0][1+i*3];
+        subGrid[2] = shareMem->buffer1[0][2+i*3];
+        subGrid[3] = shareMem->buffer1[0][9+i*3];
+        subGrid[4] = shareMem->buffer1[0][10+i*3];
+        subGrid[5] = shareMem->buffer1[0][11+i*3];
+        subGrid[6] = shareMem->buffer1[0][18+i*3];
+        subGrid[7] = shareMem->buffer1[0][19+i*3];
+        subGrid[8] = shareMem->buffer1[0][20+i*3];
 
         totalVal += validateSubGrid(subGrid);
     }
 
     for (i = 0; i < 3; i++)
     {
-        subGrid[0] = buffer1[0][27+i*3];
-        subGrid[1] = buffer1[0][28+i*3];
-        subGrid[2] = buffer1[0][29+i*3];
-        subGrid[3] = buffer1[0][36+i*3];
-        subGrid[4] = buffer1[0][37+i*3];
-        subGrid[5] = buffer1[0][38+i*3];
-        subGrid[6] = buffer1[0][45+i*3];
-        subGrid[7] = buffer1[0][46+i*3];
-        subGrid[8] = buffer1[0][47+i*3];
+        subGrid[0] = shareMem->buffer1[0][27+i*3];
+        subGrid[1] = shareMem->buffer1[0][28+i*3];
+        subGrid[2] = shareMem->buffer1[0][29+i*3];
+        subGrid[3] = shareMem->buffer1[0][36+i*3];
+        subGrid[4] = shareMem->buffer1[0][37+i*3];
+        subGrid[5] = shareMem->buffer1[0][38+i*3];
+        subGrid[6] = shareMem->buffer1[0][45+i*3];
+        subGrid[7] = shareMem->buffer1[0][46+i*3];
+        subGrid[8] = shareMem->buffer1[0][47+i*3];
 
         totalVal += validateSubGrid(subGrid);
     }
 
     for (i = 0; i < 3; i++)
     {
-        subGrid[0] = buffer1[0][54+i*3];
-        subGrid[1] = buffer1[0][55+i*3];
-        subGrid[2] = buffer1[0][56+i*3];
-        subGrid[3] = buffer1[0][63+i*3];
-        subGrid[4] = buffer1[0][64+i*3];
-        subGrid[5] = buffer1[0][65+i*3];
-        subGrid[6] = buffer1[0][72+i*3];
-        subGrid[7] = buffer1[0][73+i*3];
-        subGrid[8] = buffer1[0][74+i*3];
+        subGrid[0] = shareMem->buffer1[0][54+i*3];
+        subGrid[1] = shareMem->buffer1[0][55+i*3];
+        subGrid[2] = shareMem->buffer1[0][56+i*3];
+        subGrid[3] = shareMem->buffer1[0][63+i*3];
+        subGrid[4] = shareMem->buffer1[0][64+i*3];
+        subGrid[5] = shareMem->buffer1[0][65+i*3];
+        subGrid[6] = shareMem->buffer1[0][72+i*3];
+        subGrid[7] = shareMem->buffer1[0][73+i*3];
+        subGrid[8] = shareMem->buffer1[0][74+i*3];
 
         totalVal += validateSubGrid(subGrid);
     }

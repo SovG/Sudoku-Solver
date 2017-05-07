@@ -38,6 +38,7 @@ int readFile (Buffer1* buffer1, char* filename)
             }
         }
     }
+    fclose(inFile);
     return 0;
 }
 
