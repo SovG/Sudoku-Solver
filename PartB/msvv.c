@@ -15,6 +15,7 @@
 SharedMemory* shareMem;
 Locks* locks;
 int completedRows;
+FILE* outFile;
 
 int main (int argc, char* argv[])
 {

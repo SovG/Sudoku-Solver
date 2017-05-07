@@ -25,18 +25,19 @@ int validateRow (int rowNum, Buffer1 *buffer1)
     return valid;
 }
 
-int validateAllCols (Buffer1 *buffer1)
+int validateAllCols (Buffer1 *buffer1, int* totVal)
 {
-    int i, totalVal = 0;
+    int i, valid = 0;
     for (i = 0; i < 9; i++)
     {
         if ((validateCols(i, buffer1)) == 1)
         {
-            totalVal++;
+            totVal[i] = 1;
+            valid++;
         }
     }
 
-    return totalVal;
+    return valid;
 }
 
 int validateCols (int colNum, Buffer1 *buffer1)
