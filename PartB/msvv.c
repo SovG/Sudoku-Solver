@@ -11,10 +11,11 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 /* Global Variable shared between threads as used by textbook */
 SharedMemory* shareMem;
 Locks* locks;
-int completedRows;
+int completedRows, maxDelay;
 FILE* outFile;
 
 int main (int argc, char* argv[])
@@ -26,7 +27,7 @@ int main (int argc, char* argv[])
     }
     else
     {
-        int i;
+        int i, status;
         pthread_t threadArray[11]; /*So we can Join threads after they've completed execution */
         shareMem = (SharedMemory*)malloc(sizeof(SharedMemory));
         locks = (Locks*)malloc(sizeof(Locks));
@@ -36,8 +37,17 @@ int main (int argc, char* argv[])
         completedRows = 0;
         shareMem->totalVal = 0;
         shareMem->completedChildren = 0;
-
-        readFile(shareMem, argv[1]);
+        /* Ensure that logfile has nothing in it */
+        outFile = fopen("logfile.txt", "w");
+        fclose(outFile);
+        status = readFile(shareMem, argv[1]);
+        if (status == -1)
+        {
+            fprintf(stderr, "Error with reading file.\n");
+            return -1;
+        }
+        srand(time(NULL));
+        maxDelay = atoi(argv[2]);
 
         /* Use a FOR Loop to create the 11 Child threads. If it is the first
          * 9 threads being created send it to groupOne, 10th thread goes to
@@ -82,18 +92,28 @@ int main (int argc, char* argv[])
 void* groupOne (void* threadNum)
 {
     int row, valid;
-
+    /* This code segment is for deciding which row this thread will work on. There
+     * is a Global Variable for completedRows which is only incremented inside
+     * mutex locks and it is assigned to a variable on the stack to ensure there
+     * are no double ups for validating the rows                                */
     pthread_mutex_lock(&locks->mutex);
     completedRows++;
     row = completedRows;
     pthread_mutex_unlock(&locks->mutex);
     valid = validateRow(row, shareMem);
-
+    sleep(rand() % maxDelay);
     /* As accessing shared data using Mutex Locks to solve CSP */
     pthread_mutex_lock(&locks->mutex);
     shareMem->buffer2[row-1] = valid;
     shareMem->totalVal += valid;
     shareMem->completedChildren++;
+    /* Only write to log-file if row is invalid */
+    if (valid == 0)
+    {
+        outFile = fopen("logfile.txt", "a");
+        fprintf(outFile, "Thread ID-%d: row %d is invalid.\n", row, row);
+        fclose(outFile);
+    }
     /* If all children have been completed signal parent thread to continue */
     if (shareMem->completedChildren == 11)
     {
@@ -107,14 +127,29 @@ void* groupOne (void* threadNum)
 /* Thread assigned to this function validates all the columns for the Sudoku solution.*/
 void* groupTwo (void* nothing)
 {
-    int valid;
-    valid = validateAllCols(shareMem);
-
+    int totVal[9], valid, i;
+    valid = validateAllCols(shareMem, totVal);
+    sleep(rand() % maxDelay);
     /* As accessing shared data using Mutex Locks to solve CSP */
     pthread_mutex_lock(&locks->mutex);
     shareMem->buffer2[9] = valid;
     shareMem->totalVal += valid;
     shareMem->completedChildren++;
+    /* If total valid columns is not 9 then write to logfile */
+    if (valid != 9)
+    {
+        outFile = fopen("logfile.txt", "a");
+        fprintf(outFile, "Thread ID-10: Column, ");
+        for (i = 0; i < 9; i++)
+        {
+            if (totVal[i] == 0)
+            {
+                fprintf(outFile, "%d, ", i+1);
+            }
+        }
+        fprintf(outFile, "are invalid\n");
+        fclose(outFile);
+    }
     /* If all children have been completed signal parent thread to continue */
     if (shareMem->completedChildren == 11)
     {
@@ -127,14 +162,28 @@ void* groupTwo (void* nothing)
 /* Threads assigned to this function validates every subgrid of the Sudoku Solution */
 void* groupThree (void* nothing)
 {
-    int valid;
-    valid = validateAllGrids(shareMem);
-
+    int totVal[9], valid, i;
+    valid = validateAllGrids(shareMem, totVal);
+    sleep(rand() % maxDelay);
     /* As accessing shared data using Mutex Locks to solve CSP */
     pthread_mutex_lock(&locks->mutex);
     shareMem->buffer2[10] = valid;
     shareMem->totalVal += valid;
     shareMem->completedChildren++;
+    if (valid != 9)
+    {
+        outFile = fopen("logfile.txt", "a");
+        fprintf(outFile, "Thread ID-11: Sub-Grid [");
+        for (i = 0; i < 9; i++)
+        {
+            if (totVal[i] == 0)
+            {
+                fprintf(outFile, " %d,", i+1);
+            }
+        }
+        fprintf(outFile, " ], are invalid.\n");
+        fclose(outFile);
+    }
     /* If all children have been completed signal parent thread to continue */
     if (shareMem->completedChildren == 11)
     {

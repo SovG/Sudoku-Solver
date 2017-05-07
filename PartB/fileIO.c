@@ -32,11 +32,16 @@ int readFile (SharedMemory* shareMem, char* filename)
             count++;
             if (count > 81)
             {
-/*            fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
-            return -1; */
-            break;
+                fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
+                return -1;
             }
         }
+    }
+    if (count != 81)
+    {
+        fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
+        fclose(inFile);
+        return -1;
     }
     fclose(inFile);
     return 0;
@@ -51,15 +56,15 @@ void printResults (SharedMemory* shareMem)
     {
         if(shareMem->buffer2[i-1] == 1)
         {
-            printf("Validation result from Process ID-%d: row %d is valid.\n", i, i);
+            printf("Validation result from Thread ID-%d: row %d is valid.\n", i, i);
         }
         else
         {
-            printf("Validation result from Process ID-%d: row %d is not valid.\n", i, i);
+            printf("Validation result from Thread ID-%d: row %d is not valid.\n", i, i);
         }
     }
-    printf("Validation result from Process ID-10: %d of 9 columns are valid.\n", shareMem->buffer2[9]);
-    printf("Validation result from Process ID-11: %d of 9 Sub-Grids are valid.\n\n", shareMem->buffer2[10]);
+    printf("Validation result from Thread ID-10: %d of 9 columns are valid.\n", shareMem->buffer2[9]);
+    printf("Validation result from Thread ID-11: %d of 9 Sub-Grids are valid.\n\n", shareMem->buffer2[10]);
 
     if(shareMem->totalVal != 27)
     {

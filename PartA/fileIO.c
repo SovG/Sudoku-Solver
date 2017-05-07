@@ -2,7 +2,9 @@
 #include "msvv.h"
 #include <stdio.h>
 
-/* Function reads the Sudoku Solution from file and loads it into Buffer 1 */
+/* Function reads the Sudoku Solution from file and loads it into Buffer 1.
+ * Error checking, so if input is not the same as described in the assignment
+ * specsheet, will return an error to terminal and terminate program         */
 int readFile (Buffer1* buffer1, char* filename)
 {
     FILE* inFile;
@@ -26,17 +28,24 @@ int readFile (Buffer1* buffer1, char* filename)
             if (c < 1 || c > 9)
             {
                 fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
+                fclose(inFile);
                 return -1;
             }
             buffer1->sudokuSolution[0][count] = c;
             count++;
             if (count > 81)
             {
-/*            fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
-            return -1; */
-            break;
+                fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
+                fclose(inFile);
+                return -1;
             }
         }
+    }
+    if (count != 81)
+    {
+        fprintf(stderr, "Error - Sudoku Solution input is invalid\n");
+        fclose(inFile);
+        return -1;
     }
     fclose(inFile);
     return 0;

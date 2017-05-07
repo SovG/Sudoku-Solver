@@ -25,18 +25,19 @@ int validateRow (int rowNum, SharedMemory* shareMem)
     return valid;
 }
 
-int validateAllCols (SharedMemory* shareMem)
+int validateAllCols (SharedMemory* shareMem, int* totalVal)
 {
-    int i, totalVal = 0;
+    int i, valid = 0;
     for (i = 0; i < 9; i++)
     {
         if ((validateCols(i, shareMem)) == 1)
         {
-            totalVal++;
+            totalVal[i] = 1;
+            valid++;
         }
     }
 
-    return totalVal;
+    return valid;
 }
 
 int validateCols (int colNum, SharedMemory* shareMem)
@@ -62,9 +63,9 @@ int validateCols (int colNum, SharedMemory* shareMem)
     return valid;
 }
 
-int validateAllGrids (SharedMemory* shareMem)
+int validateAllGrids (SharedMemory* shareMem, int* totalVal)
 {
-    int totalVal = 0;
+    int valid = 0;
     int i, subGrid[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     for (i = 0; i < 3; i++)
@@ -79,7 +80,8 @@ int validateAllGrids (SharedMemory* shareMem)
         subGrid[7] = shareMem->buffer1[0][19+i*3];
         subGrid[8] = shareMem->buffer1[0][20+i*3];
 
-        totalVal += validateSubGrid(subGrid);
+        totalVal[i] = validateSubGrid(subGrid);
+        valid += validateSubGrid(subGrid);
     }
 
     for (i = 0; i < 3; i++)
@@ -94,7 +96,8 @@ int validateAllGrids (SharedMemory* shareMem)
         subGrid[7] = shareMem->buffer1[0][46+i*3];
         subGrid[8] = shareMem->buffer1[0][47+i*3];
 
-        totalVal += validateSubGrid(subGrid);
+        totalVal[i+3] = validateSubGrid(subGrid);
+        valid += validateSubGrid(subGrid);
     }
 
     for (i = 0; i < 3; i++)
@@ -109,9 +112,10 @@ int validateAllGrids (SharedMemory* shareMem)
         subGrid[7] = shareMem->buffer1[0][73+i*3];
         subGrid[8] = shareMem->buffer1[0][74+i*3];
 
-        totalVal += validateSubGrid(subGrid);
+        totalVal[i+6] = validateSubGrid(subGrid);
+        valid += validateSubGrid(subGrid);
     }
-    return totalVal;
+    return valid;
 }
 
 int validateSubGrid (int *subGrid)

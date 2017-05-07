@@ -65,9 +65,9 @@ int validateCols (int colNum, Buffer1 *buffer1)
 
 /*TODO: Divide Sudoku Solution Sub-Grids into 9 1D arrays that contain the
  * results of each sub-grid */
-int validateAllGrids (Buffer1 *buffer1)
+int validateAllGrids (Buffer1 *buffer1, int* totalVal)
 {
-    int totalVal = 0;
+    int valid = 0;
     int i, subGrid[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     for (i = 0; i < 3; i++)
@@ -82,7 +82,8 @@ int validateAllGrids (Buffer1 *buffer1)
         subGrid[7] = buffer1->sudokuSolution[0][19+i*3];
         subGrid[8] = buffer1->sudokuSolution[0][20+i*3];
 
-        totalVal += validateSubGrid(subGrid);
+        totalVal[i] = validateSubGrid(subGrid);
+        valid += validateSubGrid(subGrid);
     }
 
     for (i = 0; i < 3; i++)
@@ -97,7 +98,8 @@ int validateAllGrids (Buffer1 *buffer1)
         subGrid[7] = buffer1->sudokuSolution[0][46+i*3];
         subGrid[8] = buffer1->sudokuSolution[0][47+i*3];
 
-        totalVal += validateSubGrid(subGrid);
+        totalVal[i+3] = validateSubGrid(subGrid);
+        valid += validateSubGrid(subGrid);
     }
 
     for (i = 0; i < 3; i++)
@@ -112,9 +114,10 @@ int validateAllGrids (Buffer1 *buffer1)
         subGrid[7] = buffer1->sudokuSolution[0][73+i*3];
         subGrid[8] = buffer1->sudokuSolution[0][74+i*3];
 
-        totalVal += validateSubGrid(subGrid);
+        totalVal[i+6] = validateSubGrid(subGrid);
+        valid += validateSubGrid(subGrid);
     }
-    return totalVal;
+    return valid;
 }
 
 int validateSubGrid (int *subGrid)

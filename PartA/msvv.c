@@ -59,7 +59,7 @@ int main (int argc, char* argv[])
         {
             fprintf(stderr, "Error setting shared memory size\n");
             return -1;
-        } 
+        }
 
 
         buffer1 = (Buffer1*)mmap(0, sizeof(Buffer1), PROT_READ | PROT_WRITE, MAP_SHARED,
@@ -82,7 +82,7 @@ int main (int argc, char* argv[])
         status = readFile(buffer1, argv[1]);
         if (status == -1)
         {
-            fprintf(stderr, "Error with reading file");
+            fprintf(stderr, "Error with reading file.\n");
             return -1;
         }
         *counter = 0;
@@ -121,19 +121,24 @@ int main (int argc, char* argv[])
                  * parent, will be incremented so it can continue execution */
                 buffer2->validated[childProcCount-1] = valid;
                 buffer2->completedChildren++;
-                if (buffer2->completedChildren == 11)
-                {
-                    sem_post(&locks->empty);
-                } 
-                if (valid == 0)
+                /* If row is not valid write it out to logfile */
+                if (valid != 1)
                 {
                     outFile = fopen("logfile.txt", "a");
                     fprintf(outFile, "Process ID-%d: row %d is invalid.\n", childProcCount, childProcCount);
                     fclose(outFile);
-                }   
+                }
+                /* If this is the last child to complete signal semaphore blocking parent */
+                if (buffer2->completedChildren == 11)
+                {
+                    sem_post(&locks->empty);
+                }
+
                 sem_post(&locks->mutex);
-                
+
             }
+            /* Else check if Child Process is the 10th forked one, if so make it
+             * validate all the columns                                        */
             else if (childProcCount == 10)
             {
                 int totVal[9], valid, i;
@@ -149,7 +154,10 @@ int main (int argc, char* argv[])
                     fprintf(outFile, "Process ID-10: Column, ");
                     for (i = 0; i < 9; i++)
                     {
-                        fprintf(outFile, "%d, ", i+1);
+                        if(totVal[i] != 1)
+                        {
+                            fprintf(outFile, "%d, ", i+1);
+                        }
                     }
                     fprintf(outFile, "are invalid\n");
                     fclose(outFile);
@@ -160,10 +168,12 @@ int main (int argc, char* argv[])
                 }
                 sem_post(&locks->mutex);
             }
+            /* Otherwise must be the 11th Child, therefor make it validate all
+             * the subgrids                                                   */
             else
             {
                 int totVal[9], valid, i;
-                valid = validateAllGrids(buffer1);
+                valid = validateAllGrids(buffer1, totVal);
                 sleep(rand() % atoi(argv[2]));
                 sem_wait(&locks->mutex);
                 *counter += valid;
@@ -175,7 +185,10 @@ int main (int argc, char* argv[])
                     fprintf(outFile, "Process ID-11: SubGrid, [");
                     for (i = 0; i < 9; i++)
                     {
-                        fprintf(outFile, " %d,", i+1);
+                        if (totVal[i] != 1)
+                        {
+                            fprintf(outFile, " %d,", i+1);
+                        }
                     }
                     fprintf(outFile, " ] are invalid\n");
                     fclose(outFile);
@@ -203,8 +216,7 @@ int main (int argc, char* argv[])
             }
         }
         /* Print Stuff now that all validation is done */
-        printResults(buffer2, *counter); 
-        fflush(stdout);
+        printResults(buffer2, *counter);
 
         /* Destroy shared memory and semaphores */
         sem_destroy(&locks->mutex);
